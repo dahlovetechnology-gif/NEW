@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2FA Registration with OTP</title>
+  <script src="https://smtpjs.com/v3/smtp.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f1f1f1;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 50px auto;
+      background: white;
+      padding: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    .back-btn {
+      background-color: red;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Screen 0: Registration -->
+<div class="container" id="screen0">
+  <h2>Create Account</h2>
+  <input type="text" id="fullname" placeholder="Full Name">
+  <input type="email" id="regemail" placeholder="Email">
+  <input type="text" id="phone" placeholder="Phone Number">
+  <input type="password" id="regpassword" placeholder="Password">
+  <button onclick="sendOTP()">Register</button>
+  <button class="back-btn" onclick="showScreen('screen1')">Back</button>
+</div>
+
+<!-- Screen 1: Welcome -->
+<div class="container" id="screen1" style="display:none; text-align:center;">
+  <img src="https://nou.edu.ng//wp-content/uploads/2021/12/Logo-1-257x300.png" alt="NOUN Logo" width="100" style="margin-bottom:20px;">
+  <h2>Welcome!</h2>
+  <p style="font-size: 14px; color: #333;">
+    Welcome to my project website, <strong>'Design and Development of a Multi-Factor Authentication Method for Preventing Data Leakage on Mobile Networks.'</strong><br><br>
+    I'm <strong>OLATUNJI TAIWO</strong>. This platform showcases my research and solution to enhance mobile network security. <br>
+    <strong>Explore and learn with me!</strong>
+  </p>
+  <button onclick="showScreen('screen0')">Create Account</button>
+</div>
+
+<!-- Screen 2: OTP Verification -->
+<div class="container" id="screen2" style="display:none;">
+  <h2>Verify Your Email</h2>
+  <p>We have sent a 6-digit OTP to your email address.</p>
+  <input type="text" id="otpInput" placeholder="Enter OTP">
+  <button onclick="verifyOTP()">Verify</button>
+  <button class="back-btn" onclick="showScreen('screen0')">Back</button>
+</div>
+
+<!-- Screen 3: Access Granted / Dashboard -->
+<div class="container" id="screen3" style="display:none;">
+  <h2>User Dashboard</h2>
+  <p>Upload your files (PDF, DOCX, PPT, JPEG, etc):</p>
+  <input type="file" id="fileUpload" multiple>
+  <button onclick="handleFileUpload()">Upload</button>
+  <div id="fileList" style="margin-top:20px;"></div>
+  <button class="back-btn" onclick="showScreen('screen1')">Logout</button>
+</div>
+
+<script>
+  let generatedOTP = null;
+  let registeredEmail = "";
+
+  function showScreen(id) {
+    const screens = ['screen0', 'screen1', 'screen2', 'screen3'];
+    screens.forEach(s => document.getElementById(s).style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function sendOTP() {
+    const email = document.getElementById('regemail').value;
+    const fullname = document.getElementById('fullname').value;
+    const phone = document.getElementById('phone').value;
+    const password = document.getElementById('regpassword').value;
+
+    if (!fullname || !email || !phone || !password) {
+      alert('All fields are required.');
+      return;
+    }
+
+    registeredEmail = email;
+    generatedOTP = Math.floor(100000 + Math.random() * 900000);
+
+    Email.send({
+      SecureToken: "https://smtpjs.com/v3/smtp.js",
+      To: email,
+      From: "dahlovetechnology@gmail.com",
+      Subject: "123456",
+      Body: `Your OTP is: <b>${generatedOTP}</b>`
+    }).then(
+      message => {
+        if (message === 'OK') {
+          alert("OTP sent to your email.");
+          showScreen('screen2');
+        } else {
+          alert("Failed to send OTP: " + message);
+        }
+      }
+    );
+  }
+
+  function verifyOTP() {
+    const enteredOTP = document.getElementById('otpInput').value;
+    if (enteredOTP == generatedOTP) {
+      alert("Email verified successfully. Access granted.");
+      showScreen('screen3');
+    } else {
+      alert('Incorrect OTP. Try again.');
+    }
+  }
+
+  function handleFileUpload() {
+    const fileInput = document.getElementById('fileUpload');
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = "";
+
+    if (fileInput.files.length === 0) {
+      alert("Please select a file to upload.");
+      return;
+    }
+
+    for (const file of fileInput.files) {
+      const item = document.createElement("p");
+      item.textContent = `Uploaded: ${file.name} (${(file.size/1024).toFixed(2)} KB)`;
+      fileList.appendChild(item);
+    }
+
+    alert("File uploaded (simulated). In production, connect to a server or cloud storage.");
+  }
+
+  showScreen('screen1');
+</script>
+
+</body>
+</html>
